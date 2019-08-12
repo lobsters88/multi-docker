@@ -1,0 +1,23 @@
+language: generic
+sudo: required
+services:
+  - docker
+
+before_install:
+  - docker build -t lobsters88@react-test -f ./client/Dockerfile.dev ./client
+
+script:
+  - docker run -e CI=true lobsters88/react-test npm test
+
+after_success:
+  - docker build -t lobsters88/multi-client ./client
+  - docker build -t lobsters88/multi-nginx ./nginx
+  - docker build -t lobsters88/multi-server ./server
+  - docker build -t lobsters88/multi-worker ./worker
+  - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_ID" --password-stdin
+  - docker push lobsters88/multi-client
+  - docker push lobsters88/multi-nginx
+  - docker push lobsters88/multi-server
+  - docker push lobsters88/multi-worker
+  
+
